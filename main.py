@@ -10,6 +10,7 @@ from time import sleep
 import speech_recognition as sr
 import torch
 import whisper
+import pyttsx3
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -53,8 +54,27 @@ def notify(message: str) -> None:
     :returns: None
 
     """
-    Popen(["espeak", message])
+    speak(message)
+    # Popen(["espeak", message])
     # Popen(["notify-send", "listenMe", message])
+
+
+def speak(message: str) -> None:
+    """TODO: Docstring for speak.
+
+    :message: TODO
+    :returns: TODO
+
+    """
+    # Initialize the text-to-speech engine
+    engine = pyttsx3.init()
+
+    # Convert the text to speech
+    engine.say(message)
+
+    # Wait for the speech to finish and clean up resources
+    engine.runAndWait()
+    engine.stop()
 
 
 def command(text: str) -> None:
@@ -74,8 +94,10 @@ def command(text: str) -> None:
         ["open telegram", "telegram-desktop", "Telegram opened."],
         ["close window", "xdotool getactivewindow windowkill", "Window closed."],
     ]
+    command_executed = False
     for cmd in commands:
         if cmd[0] in text:
+            command_executed = True
             try:
                 Popen(cmd[1].split(), stdout=open(os.devnull, 'wb'),
                       stderr=open(os.devnull, 'wb'))
@@ -83,7 +105,8 @@ def command(text: str) -> None:
             except FileNotFoundError:
                 notify(f"Command {cmd[0]} not working.")
             break
-    notify("Not found.")
+    if not command_executed:
+        notify("Not found.")
 
 
 def main():

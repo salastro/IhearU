@@ -8,6 +8,7 @@ pyaudio = "*"
 speechrecognition = "*"
 torch = "*"
 openai-whisper = "*"
+pyttsx3 = "*"
 
 [dev-packages]
 pynvim = "*"
