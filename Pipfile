@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pyaudio = "*"
+speechrecognition = "*"
+torch = "*"
+openai-whisper = "*"
+
+[dev-packages]
+pynvim = "*"
+pylint = "*"
+
+[requires]
+python_version = "3.11"
