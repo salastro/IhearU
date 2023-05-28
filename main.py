@@ -19,7 +19,7 @@ def parse_arguments() -> argparse.Namespace:
 
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="tiny", help="Model to use",
+    parser.add_argument("--model", default="base", help="Model to use",
                         choices=["tiny", "base", "small", "medium", "large"])
     parser.add_argument("--non_english", action='store_true',
                         help="Don't use the english model.")
@@ -169,7 +169,6 @@ def main():
                 if phrase_time and now - phrase_time > timedelta(seconds=phrase_timeout):
                     last_sample = bytes()
                     phrase_complete = True
-                    command_executed = False
                 # This is the last time we received new audio data from the
                 # queue.
                 phrase_time = now
@@ -194,6 +193,11 @@ def main():
                     temp_file, fp16=torch.cuda.is_available())
                 text = result['text'].strip()
 
+                # Check if the transcription is a command.
+                if "command" in text.lower():
+                    command(text.lower())
+                    phrase_complete = True
+
                 # If we detected a pause between recordings, add a new item to
                 # our transcripion. Otherwise edit the existing one.
                 if phrase_complete:
@@ -208,16 +212,13 @@ def main():
                 # Flush stdout.
                 print('', end='', flush=True)
 
-                # Check if the transcription is a command.
-                if "command" in text.lower() and not command_executed:
-                    command(text.lower())
-                    command_executed = True
-
                 # Infinite loops are bad for processors, must sleep.
                 sleep(0.25)
         except KeyboardInterrupt:
             break
 
+    # Clear the console and print the final transcription.
+    os.system('cls' if os.name == 'nt' else 'clear')
     print("\n\nTranscription:")
     for line in transcription:
         print(line)
